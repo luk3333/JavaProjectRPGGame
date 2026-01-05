@@ -134,6 +134,7 @@ public class Player {
     }
     public void heal(int d) { hp = Math.min(maxHp, hp + d); }
     public int getMaxHp() { return maxHp; }
+    public int getHp() { return hp; }
     public String getName() { return name; }
     public int getDefense() { return defense; }
     public boolean isAlive() { return hp > 0; }
@@ -151,6 +152,13 @@ public class Player {
         if (a instanceof Armor) bonus = ((Armor) a).getDefenseValue();
         return defense + bonus;
     }
+    
+    // setters used for loading from save
+    public void setHp(int hp) { this.hp = Math.max(0, Math.min(hp, maxHp)); }
+    public void setBaseAttack(int attack) { this.baseAttack = attack; }
+    public void setExp(int exp) { this.exp = exp; }
+    public void setLevel(int level) { this.level = level; }
+    public void setDefense(int def) { this.defense = def; }
     
     public void gainExp(int amount) {
         exp += amount;

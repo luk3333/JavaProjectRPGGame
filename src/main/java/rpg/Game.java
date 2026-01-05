@@ -1,7 +1,15 @@
 package rpg;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Game {
     private Player player;
@@ -53,7 +61,87 @@ public class Game {
     }
 
     public void loadGame() {
-        System.out.println("Load game feature coming soon...");
+        System.out.print("Enter save filename to load (default: savegame.json): ");
+        String fileName = scanner.nextLine().trim();
+        if (fileName.isEmpty()) fileName = "savegame.json";
+
+        try {
+            String json = Files.readString(Paths.get(fileName));
+
+            String name = extractString(json, "name");
+            int maxHp = extractInt(json, "hp", 50);
+            int currentHp = extractInt(json, "currentHp", maxHp);
+            int baseAttack = extractInt(json, "baseAttack", 5);
+            int defense = extractInt(json, "defense", 0);
+            int exp = extractInt(json, "exp", 0);
+            int level = extractInt(json, "level", 1);
+            int inventoryCapacity = extractInt(json, "inventoryCapacity", 10);
+            int equippedWeaponIndex = extractInt(json, "equippedWeaponIndex", -1);
+            int equippedArmorIndex = extractInt(json, "equippedArmorIndex", -1);
+
+            Player p = new Player(name, maxHp, baseAttack, inventoryCapacity);
+            p.setHp(currentHp);
+            p.setBaseAttack(baseAttack);
+            p.setDefense(defense);
+            p.setExp(exp);
+            p.setLevel(level);
+
+            // parse inventory
+            Pattern invPattern = Pattern.compile("\"inventory\"\\s*:\\s*\\[(.*)\\]", Pattern.DOTALL);
+            Matcher invMatcher = invPattern.matcher(json);
+            if (invMatcher.find()) {
+                String invContent = invMatcher.group(1);
+                Pattern itemPattern = Pattern.compile("\\{(.*?)\\}", Pattern.DOTALL);
+                Matcher itemMatcher = itemPattern.matcher(invContent);
+                List<Item> items = new ArrayList<>();
+                while (itemMatcher.find()) {
+                    String itemJson = itemMatcher.group(1);
+                    String type = extractString(itemJson, "type");
+                    String iname = extractString(itemJson, "name");
+                    if ("Potion".equalsIgnoreCase(type)) {
+                        int heal = extractInt(itemJson, "heal", Potion.POTION_MIN_HEAL);
+                        items.add(new Potion(iname, heal));
+                    } else if ("Weapon".equalsIgnoreCase(type)) {
+                        int atk = extractInt(itemJson, "attack", Weapon.WEAPON_MIN_ATTACK);
+                        items.add(new Weapon(iname, atk));
+                    } else if ("Armor".equalsIgnoreCase(type)) {
+                        int def = extractInt(itemJson, "defense", Armor.ARMOR_MIN_DEFENSE);
+                        items.add(new Armor(iname, def));
+                    }
+                }
+                for (Item it : items) p.addItem(it);
+
+                // equip indices
+                if (equippedWeaponIndex >= 0 && equippedWeaponIndex < p.getInventoryCount()) {
+                    p.equipWeaponAt(equippedWeaponIndex);
+                }
+                if (equippedArmorIndex >= 0 && equippedArmorIndex < p.getInventoryCount()) {
+                    p.equipArmorAt(equippedArmorIndex);
+                }
+            }
+
+            this.player = p;
+            System.out.println("Loaded save for '" + name + "'.");
+            start();
+        } catch (IOException e) {
+            System.out.println("Failed to load save: " + e.getMessage());
+        }
+    }
+
+    private String extractString(String json, String key) {
+        Pattern p = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*\"(.*?)\"", Pattern.DOTALL);
+        Matcher m = p.matcher(json);
+        if (m.find()) return m.group(1);
+        return "";
+    }
+
+    private int extractInt(String json, String key, int defaultVal) {
+        Pattern p = Pattern.compile("\"" + Pattern.quote(key) + "\"\\s*:\\s*(-?\\d+)");
+        Matcher m = p.matcher(json);
+        if (m.find()) {
+            try { return Integer.parseInt(m.group(1)); } catch (NumberFormatException ex) { return defaultVal; }
+        }
+        return defaultVal;
     }
 
     public void start() {
@@ -65,7 +153,7 @@ public class Game {
             System.out.println("1. Stats");
             System.out.println("2. Inventory");
             System.out.println("3. Explore");
-            System.out.println("4. Quit");
+            System.out.println("4. Save & Quit");
             System.out.print("Enter choice: ");
 
             int choice = scanner.nextInt();
@@ -167,6 +255,10 @@ public class Game {
                     handleExplore();
                     break;
                 case 4:
+                    System.out.print("Save file name (default: savegame.json): ");
+                    String fileName = scanner.nextLine().trim();
+                    if (fileName.isEmpty()) fileName = "savegame.json";
+                    saveGame(fileName);
                     System.out.println("Quitting game.");
                     running = false;
                     break;
@@ -319,5 +411,69 @@ public class Game {
         } else {
             System.out.println("You discarded " + drop + ".");
         }
+    }
+
+    // Save the player's state to a JSON file (name, stats, level, inventory, equipped indices)
+    private void saveGame(String fileName) {
+        if (player == null) {
+            System.out.println("No player to save.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"name\":\"").append(escapeJson(player.getName())).append("\",");
+        sb.append("\"hp\":").append(player.getMaxHp()).append(",");
+        sb.append("\"currentHp\":").append(player.getHp()).append(",");
+        sb.append("\"baseAttack\":").append(player.getBaseAttack()).append(",");
+        sb.append("\"defense\":").append(player.getDefense()).append(",");
+        sb.append("\"exp\":").append(player.getExp()).append(",");
+        sb.append("\"level\":").append(player.getLevel()).append(",");
+        sb.append("\"inventoryCapacity\":").append(player.getInventoryCapacity()).append(",");
+        sb.append("\"equippedWeaponIndex\":").append(player.getEquippedWeaponIndex()).append(",");
+        sb.append("\"equippedArmorIndex\":").append(player.getEquippedArmorIndex()).append(",");
+
+        sb.append("\"inventory\":[");
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            Item it = player.getInventory().get(i);
+            sb.append("{");
+            if (it instanceof Potion) {
+                Potion p = (Potion) it;
+                sb.append("\"type\":\"Potion\",");
+                sb.append("\"name\":\"").append(escapeJson(p.getName())).append("\",");
+                sb.append("\"heal\":").append(p.getHealAmount());
+            } else if (it instanceof Weapon) {
+                Weapon w = (Weapon) it;
+                sb.append("\"type\":\"Weapon\",");
+                sb.append("\"name\":\"").append(escapeJson(w.getName())).append("\",");
+                sb.append("\"attack\":").append(w.getAttackValue());
+            } else if (it instanceof Armor) {
+                Armor a = (Armor) it;
+                sb.append("\"type\":\"Armor\",");
+                sb.append("\"name\":\"").append(escapeJson(a.getName())).append("\",");
+                sb.append("\"defense\":").append(a.getDefenseValue());
+            } else {
+                sb.append("\"type\":\"Unknown\",");
+                sb.append("\"name\":\"").append(escapeJson(it.getName())).append("\"");
+            }
+            sb.append("}");
+            if (i < player.getInventory().size() - 1) sb.append(",");
+        }
+        sb.append("]");
+
+        sb.append("}");
+
+        // write to file
+        try (FileWriter fw = new FileWriter(fileName)) {
+            fw.write(sb.toString());
+            System.out.println("Game saved to '" + fileName + "'.");
+        } catch (IOException e) {
+            System.out.println("Failed to save game: " + e.getMessage());
+        }
+    }
+
+    // minimal JSON string escaper
+    private String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
     }
 }
