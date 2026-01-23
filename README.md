@@ -83,16 +83,6 @@ java -cp bin rpg.Main
 - **Atak** - Zadaj obrażenia wrogowi
 - **Użyj miksturę** - Spożyj miksturę, aby przywrócić zdrowie
 
-## Cechy gry
-
-✓ Tworzenie postaci z trzema klasami bohaterów
-✓ System statystyk RPG (HP, Atak, Obrona, Poziom, Doświadczenie)
-✓ System ekwipunku z zarządzaniem wyposażeniem
-✓ Turowa walka z losowymi spotkaniami wrogów
-✓ Porzucanie przedmiotów i system łupów
-✓ Funkcja zapisywania/wczytywania gry (format JSON)
-✓ System postępu przebojów
-
 ## Struktura projektu
 ```
 src/
