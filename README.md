@@ -53,7 +53,7 @@ Wczytanie gry przy uruchomieniu programu.
 
 ### 1. Klonowanie repozytorium
 ```bash
-git clone https://github.com/yourusername/JavaProjectRPGGame.git
+git clone https://github.com/luk3333/JavaProjectRPGGame.git
 cd JavaProjectRPGGame
 ```
 
