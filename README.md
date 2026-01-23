@@ -1,21 +1,19 @@
 # JavaProjectRPGGame
 Projekt w JAVA na przedmiot Programowanie Obiektowe, o tematyce: Gra RPG – bohaterowie, ekwipunek, potwory, walka turowa, zapis gry.
-Wymagane funkcjonalności(TODO):
+Funkcjonalności:
 1. System bohatera
 
-Możliwość stworzenia nowej postaci (wybór imienia, klasy/typu bohatera).
+Tworzenie nowej postaci (wybór imienia, klasy/typu bohatera) posiadającej statystyki: zdrowie (HP), atak, obrona, poziom, doświadczenie.
 
-Podstawowe statystyki: zdrowie (HP), atak, obrona, poziom, doświadczenie.
-
-Mechanizm zdobywania doświadczenia i awansowania na wyższe poziomy.
+Zdobywanie doświadczenia i awansowania na wyższe poziomy.
 
 Wyświetlanie informacji o bohaterze.
 
 2. Ekwipunek (inventory)
 
-System przechowywania przedmiotów (np. broń, zbroja, mikstury).
+Przechowywanie przedmiotów (np. broń, zbroja, mikstury).
 
-Możliwość podnoszenia przedmiotów.
+Podnoszenie przedmiotów.
 
 Wyświetlanie ekwipunku.
 
@@ -27,38 +25,86 @@ Używanie przedmiotów (np. mikstura lecząca).
 
 Generowanie przeciwników o różnych statystykach.
 
-Proste typy potworów (np. goblin, wilk, troll) różniące się siłą i wytrzymałością.
-
 Wyświetlanie informacji o napotkanym potworze.
 
 4. Walka turowa
 
-Rozpoczynanie walki po napotkaniu potwora.
-
-Przebieg tury:
-
-Tura bohatera (atak, użycie przedmiotu, ucieczka – opcjonalnie).
-
-Tura potwora (atak).
+Rozpoczynanie walki po napotkaniu potwora, w której gracz atakuje, używa przedmiotu, a potwór zawsze atakuje.
 
 Obliczanie obrażeń z uwzględnieniem statystyk.
 
-Warunki zakończenia walki (śmierć potwora lub bohatera).
+Zakończenie walki w przypadku spadku zdrowia (HP) bohatera lub przeciwnika.
 
-Nagroda za wygraną (przedmiot, doświadczenie, złoto – opcjonalnie).
+Wylosowanie nagrody za wygraną walkę.
 
 5. Zapis i wczytywanie gry
 
-Zapis stanu gry do pliku (np. dane bohatera, ekwipunek, aktualny poziom).
+Zapis stanu gry do pliku (dane bohatera, ekwipunek, aktualny poziom).
 
 Wczytanie gry przy uruchomieniu programu.
 
-Prosty format zapisu (JSON, tekstowy lub własny).
+# Przewodnik konfiguracji i uruchamiania
 
-6. Interfejs konsolowy
+## Wymagania wstępne
+- **Java Development Kit (JDK)** w wersji 11 lub wyższej
+- **Git** (do klonowania repozytorium)
 
-Menu główne (Nowa gra, Wczytaj grę, Wyjdź).
+## Instalacja
 
-Menu gry (statystyki, ekwipunek, eksploracja, walka).
+### 1. Klonowanie repozytorium
+```bash
+git clone https://github.com/yourusername/JavaProjectRPGGame.git
+cd JavaProjectRPGGame
+```
 
-Czytelne komunikaty i obsługa błędnych danych wejściowych.
+### 2. Kompilacja projektu
+```bash
+javac -d bin src/main/java/rpg/*.java
+```
+
+### 3. Uruchomienie gry
+```bash
+java -cp bin rpg.Main
+```
+
+## Jak grać
+
+### Menu główne
+1. **Nowa gra** - Utwórz nową postać wybierając klasę (Wojownik, Łucznik, Mag) i wpisując swoją nazwę
+2. **Kontynuuj** - Wczytaj poprzednio zapisaną grę
+
+### Akcje w grze
+- **Statystyki** - Wyświetl zdrowie, atak, obronę, poziom i doświadczenie postaci
+- **Ekwipunek** - Zarządzaj przedmiotami, wyposażaj broń/zbroję i używaj mikstur
+- **Eksploruj** - Spotykaj wrogów, znajdź łupy i walcz
+- **Zapisz i wyjdź** - Zapisz postęp przed wyjściem z gry
+
+### Walka
+- **Atak** - Zadaj obrażenia wrogowi
+- **Użyj miksturę** - Spożyj miksturę, aby przywrócić zdrowie
+
+## Struktura projektu
+```
+src/
+├── main/java/rpg/
+│   ├── Main.java              - Punkt wejścia
+│   ├── Game.java              - Kontroler gry
+│   ├── Player.java            - Postać gracza
+│   ├── Enemy.java             - Klasa wroga
+│   ├── Item.java              - Klasa bazowa przedmiotu
+│   ├── Weapon.java            - Przedmioty broni
+│   ├── Armor.java             - Przedmioty zbroi
+│   ├── Potion.java            - Przedmioty mikstur
+│   ├── HeroClass.java         - Enum klasy postaci
+│   ├── EnemyType.java         - Enum typu wroga
+│   ├── SaveGameManager.java   - Menedżer zapisu/wczytywania
+│   ├── InputReader.java       - Interfejs wejścia
+│   └── ConsoleInputReader.java- Implementacja wejścia konsolowego
+└── test/java/rpg/             - Testy jednostkowe
+```
+
+## Zapisywanie gry
+Twoja gra jest zapisywana do pliku `savegame.json` w katalogu głównym projektu. Ten plik jest wyłączony z kontroli wersji (zobacz `.gitignore`).
+
+
+Miłej przygody! 🎮
