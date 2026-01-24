@@ -46,7 +46,7 @@ Wczytanie gry przy uruchomieniu programu.
 # Przewodnik konfiguracji i uruchamiania
 
 ## Wymagania wstępne
-- **Java Development Kit (JDK)** w wersji 11 lub wyższej
+- **Java Development Kit (JDK)** w wersji najnowszej
 - **Git** (do klonowania repozytorium)
 
 ## Instalacja
